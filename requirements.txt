@@ -1,0 +1,5 @@
+aiogram==2.24
+peewee==3.15.4
+tabula-py==2.9.0
+tabula==1.0.5
+psycopg2==2.9.9
