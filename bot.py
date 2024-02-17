@@ -1,27 +1,33 @@
 import asyncio
-import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from bot.handlers.login.login_handler import register_login
+from bot.handlers.login.schedule_handler import register_schedule
+from bot.services.setting_commands import set_default_commands
+from database.common.BaseModel import db
 
 bot = Bot(token='5884965201:AAFiqkenkv-xVTf7GyzUu9sfwGFt5RumUtE', parse_mode='HTML')
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
+async def set_all_default_commands():
+    await set_default_commands(bot=bot)
+
+
 def register_all_handlers():
     register_login(dp)
+    register_schedule(dp)
 
 
 def on_startup():
-    pass
+    db.connect()
 
 
 async def main():
     try:
-        logging.basicConfig(level=logging.INFO)
-
+        await set_all_default_commands()
         register_all_handlers()
 
         on_startup()
