@@ -41,7 +41,7 @@ def download_and_process_file(url, destination_folder, department_id):
         print(f"Файл успешно скачан и переименован как {new_filename}")
         date = convert_to_datetime(extract_date_from_second_row(new_filename))
         print(f"Успешно извлечена дата: {date}")
-        json_data = pdf_to_json(new_filename)
+        json_data = pdf_to_json(new_filename, department_id)
         create_schedule(Json(json_data), department_id, date)
         print(f"Файл успешно преобразован в json")
 
@@ -63,7 +63,7 @@ def schedule_download(urls, destination_folder, time_of_day, department_ids):
         time.sleep(10)
 
 
-def pdf_to_json(path: str):
+def pdf_to_json(path: str, department_id: int):
     print(path)
     data = []
 
@@ -73,8 +73,7 @@ def pdf_to_json(path: str):
         last_group = "-"
 
         for index, item in enumerate(i.values):
-            print(item)
-            if inx != 0 or index > 0:
+            if (department_id != 0 and department_id != 1) or (inx != 0 or index > 0):
                 number_index = 1
 
                 group_name = str(item[0])
