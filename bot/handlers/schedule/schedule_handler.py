@@ -53,16 +53,20 @@ async def schedule_callback_message(call: types.CallbackQuery, callback_data: di
     teacher_first_name = callback_data.get('teacher_first_name')
     teacher_last_name = callback_data.get('teacher_last_name')
     message = ''
+    unknown_message = ''
 
     if group_name:
-        message = student_get_schedules_message(group_name, schedule_id)
+        message, unknown_message = student_get_schedules_message(group_name, schedule_id)
     elif teacher_first_name and teacher_last_name:
-        message = teacher_get_schedules_message(teacher_first_name, teacher_last_name, schedule_id)
+        message, unknown_message = teacher_get_schedules_message(teacher_first_name, teacher_last_name, schedule_id)
 
     if not message:
         message = 'Расписание отсутствует'
 
     await call.message.answer(message)
+
+    if unknown_message:
+        await call.message.answer(f'Не удалось определить\n\n{unknown_message}')
 
 
 def register_schedule(dp: Dispatcher):

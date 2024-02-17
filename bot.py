@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from bot.handlers.login.login_handler import register_login
-from bot.handlers.login.schedule_handler import register_schedule
+from bot.handlers.schedule.schedule_handler import register_schedule
 from bot.services.setting_commands import set_default_commands
 from database.common.BaseModel import db
 

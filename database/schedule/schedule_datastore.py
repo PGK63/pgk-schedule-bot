@@ -15,20 +15,24 @@ def get_schedule_by_id(schedule_id) -> ScheduleEntity:
     return ScheduleEntity.get(ScheduleEntity.id == schedule_id)
 
 
-def student_get_schedules_message(group_name, schedule_id) -> str:
+def student_get_schedules_message(group_name, schedule_id) -> (str, str):
     message = ''
+    unknown_message = ''
     schedule = get_schedule_by_id(schedule_id)
     schedule_json = ast.literal_eval(str(schedule.json))
 
     for item in schedule_json:
         if item['group_name'] == group_name:
             message += __get_schedule_message(item)
+        elif item['group_name'] == '-':
+            unknown_message += __get_schedule_message(item)
 
-    return message
+    return message, unknown_message
 
 
-def teacher_get_schedules_message(first_name, last_name, schedule_id) -> str:
+def teacher_get_schedules_message(first_name, last_name, schedule_id) -> (str, str):
     message = ''
+    unknown_message = ''
     schedule = get_schedule_by_id(schedule_id)
     schedule_json = ast.literal_eval(str(schedule.json))
 
@@ -36,7 +40,10 @@ def teacher_get_schedules_message(first_name, last_name, schedule_id) -> str:
         if f'{last_name} {first_name.strip().upper()[0]}.' in item['teacher']:
             message += __get_schedule_message(item)
 
-    return message
+        if item['group_name'] == '-':
+            unknown_message += __get_schedule_message(item)
+
+    return message, unknown_message
 
 
 def __get_schedule_message(schedule) -> str:
