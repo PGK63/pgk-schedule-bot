@@ -3,6 +3,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
+from bot.handlers.errors_handler import register_errors_handler
 from bot.handlers.login.login_handler import register_login
 from bot.handlers.schedule.schedule_handler import register_schedule
 from bot.services.setting_commands import set_default_commands
@@ -19,6 +20,7 @@ async def set_all_default_commands():
 def register_all_handlers():
     register_login(dp)
     register_schedule(dp)
+    register_errors_handler(dp)
 
 
 def on_startup():
