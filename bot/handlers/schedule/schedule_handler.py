@@ -43,7 +43,7 @@ async def schedules_message(message: types.Message):
                 )
             ])
 
-        await message.answer('Выберите день',
+        await message.answer('📅 Выберите день',
                              reply_markup=InlineKeyboardMarkup(row_width=1, inline_keyboard=schedules_inline_keyboard))
 
 
@@ -66,7 +66,7 @@ async def schedule_callback_message(call: types.CallbackQuery, callback_data: di
     await call.message.answer(message)
 
     if unknown_message:
-        await call.message.answer(f'Не удалось определить\n\n{unknown_message}')
+        await call.message.answer(f'{unknown_message}\n\n<i><b><u>Не удалось определить</u></b></i>')
 
 
 def register_schedule(dp: Dispatcher):

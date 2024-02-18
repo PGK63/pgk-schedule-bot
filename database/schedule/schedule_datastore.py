@@ -47,10 +47,10 @@ def teacher_get_schedules_message(first_name, last_name, schedule_id) -> (str, s
 
 
 def __get_schedule_message(schedule) -> str:
-    return (f"{schedule['time']}\n"
-            f"Пара - {schedule['number']}\n"
-            f"Кабинет - {schedule['cabinet']}\n"
-            f"Предмет - {schedule['subject']}\n"
-            f"Преподаватель - {schedule['teacher']}\n"
-            f"Группа - {schedule['group_name']}"
-            f"\n---\n")
+    return (f"<i><b><u>{schedule['time']}</u></b></i>\n"
+            f"🕒 Пара: {schedule['number']}\n"
+            f"🏢 Кабинет: {schedule['cabinet']}\n"
+            f"🎓 Предмет: {schedule['subject']}\n"
+            f"👤 Преподаватель: {schedule['teacher']}\n"
+            f"👥 Группа: {schedule['group_name']}"
+            f"\n\n")
