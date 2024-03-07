@@ -35,11 +35,11 @@ def create_student(chat_id, group, department_id):
     return None
 
 
-def create_teacher(chat_id, first_name, last_name, department_id):
+def create_teacher(chat_id, first_name, last_name, department_id, cabinet):
     user_data = {
         "firstName": first_name,
         "lastName": last_name,
-        "cabinet": first_name,
+        "cabinet": cabinet,
         "departmentId": department_id
     }
     response = requests.post(f"{BASE_URL}/teachers/telegram/{chat_id}", json=user_data)
@@ -49,4 +49,5 @@ def create_teacher(chat_id, first_name, last_name, department_id):
 
 
 def delete_user_by_chat_id(c_id):
-    pass
+    requests.delete(f"{BASE_URL}/users/by-telegram-id/{c_id}")
+

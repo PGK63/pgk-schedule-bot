@@ -73,8 +73,25 @@ async def teacher_input_first_name(message: types.Message, state: FSMContext):
 async def teacher_input_last_name(message: types.Message, state: FSMContext):
     last_name = message.text
 
-    await message.answer('🏫 Выберите отделение', reply_markup=get_departments_reply_markup('teacher'))
+    await message.answer('🏫 Напишите свой кабинет', reply_markup=ReplyKeyboardMarkup(
+        one_time_keyboard=True,
+        resize_keyboard=True,
+        keyboard=[
+            [
+                KeyboardButton("У меня нет кабинета")
+            ]
+        ]))
     await state.update_data(last_name=last_name)
+    await TeacherLoginState.next()
+
+
+async def teacher_input_cabinet(message: types.Message, state: FSMContext):
+    cabinet = message.text
+    if cabinet == 'У меня нет кабинета':
+        cabinet = None
+
+    await message.answer('🏫 Выберите отделение', reply_markup=get_departments_reply_markup('teacher'))
+    await state.update_data(cabinet=cabinet)
     await TeacherLoginState.next()
 
 
@@ -84,7 +101,9 @@ async def teacher_input_department(call: types.CallbackQuery, callback_data: dic
     department_id = callback_data.get('id')
     last_name = state_data.get('last_name')
     first_name = state_data.get('first_name')
-    create_teacher(call.message.chat.id, first_name, last_name, department_id)
+    cabinet = state_data.get('cabinet')
+
+    create_teacher(call.message.chat.id, first_name, last_name, department_id, cabinet)
     await state.finish()
     await call.message.answer_sticker(sticker_ok_id, reply_markup=get_default_reply_markup())
 
@@ -148,5 +167,6 @@ def register_login(dp: Dispatcher):
 
     dp.register_message_handler(teacher_input_first_name, state=TeacherLoginState.InputFirstName)
     dp.register_message_handler(teacher_input_last_name, state=TeacherLoginState.InputLastName)
+    dp.register_message_handler(teacher_input_cabinet, state=TeacherLoginState.InputCabinet)
     dp.register_callback_query_handler(teacher_input_department, department_callback.filter(),
                                        state=TeacherLoginState.InputDepartment)
