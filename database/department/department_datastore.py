@@ -1,5 +1,9 @@
-from database.department.entities.department_entity import DepartmentEntity
+import requests
+from database.common.constants import BASE_URL
 
 
 def get_departments():
-    return DepartmentEntity.select()
+    response = requests.get(f"{BASE_URL}/departments")
+    if response.status_code == 200:
+        return response.json()
+    return None

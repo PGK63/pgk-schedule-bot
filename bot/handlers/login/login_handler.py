@@ -117,8 +117,8 @@ def get_departments_reply_markup(user_role):
 
     for department in departments:
         departments_inline_keyboard.append(
-            [InlineKeyboardButton(department.name,
-                                  callback_data=department_callback.new(id=department.id, user_role=user_role))])
+            [InlineKeyboardButton(department['name'],
+                                  callback_data=department_callback.new(id=department['id'], user_role=user_role))])
 
     return InlineKeyboardMarkup(row_width=1, inline_keyboard=departments_inline_keyboard)
 
