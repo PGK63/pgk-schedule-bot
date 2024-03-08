@@ -101,7 +101,12 @@ async def teacher_input_department(call: types.CallbackQuery, callback_data: dic
     department_id = callback_data.get('id')
     last_name = state_data.get('last_name')
     first_name = state_data.get('first_name')
-    cabinet = state_data.get('cabinet')
+    cabinet = None
+
+    try:
+        cabinet = state_data.get('cabinet')
+    except Exception:
+        pass
 
     create_teacher(call.message.chat.id, first_name, last_name, department_id, cabinet)
     await state.finish()
