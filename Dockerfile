@@ -5,4 +5,4 @@ RUN pip3 install --upgrade setuptools
 RUN pip3 install -r requirements.txt
 RUN chmod 755 .
 COPY . .
-CMD ["python3", "bot.py", "&&", "python3", "download_file.py"]
+CMD ["python3", "bot.py"]

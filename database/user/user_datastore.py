@@ -5,23 +5,7 @@ from database.common.constants import BASE_URL
 
 def get_user_by_chat_id(c_id):
     response = requests.get(f"{BASE_URL}/students/by-telegram-id/{c_id}")
-    if response.status_code == 200:
-        return response.json()
-    return None
-
-
-def get_student_by_id(user_id):
-    response = requests.get(f"{BASE_URL}/students/by-telegram-id/{user_id}")
-    if response.status_code == 200:
-        return response.json()
-    return None
-
-
-def get_teacher_by_id(user_id):
-    response = requests.get(f"{BASE_URL}/teachers/by-telegram-id/{user_id}")
-    if response.status_code == 200:
-        return response.json()
-    return None
+    return response.json()
 
 
 def create_student(chat_id, group, department_id):
@@ -51,3 +35,6 @@ def create_teacher(chat_id, first_name, last_name, department_id, cabinet):
 def delete_user_by_chat_id(c_id):
     requests.delete(f"{BASE_URL}/users/by-telegram-id/{c_id}")
 
+
+def get_role_by_chat_id(c_id):
+    return requests.get(f"{BASE_URL}/users/role/by-telegram-id/{c_id}")
