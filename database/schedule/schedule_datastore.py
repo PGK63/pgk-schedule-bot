@@ -30,7 +30,7 @@ def student_get_schedules_message(chat_id, schedule_id) -> str:
             cabinet = "Не указан"
 
         if bool(column['exam']):
-            number += f" (Экзамен)"
+            number += f" (📌Экзамен)"
 
         message += (f"{number}\n"
                     f"🏢 Кабинет: {cabinet}\n"
@@ -50,14 +50,14 @@ def teacher_get_schedules_message(chat_id, schedule_id) -> str:
     message = f"<i><b><u>{date}</u></b></i>\n\n"
 
     for column in json['columns']:
-        exam = 'Нет'
+        exam = ''
         if bool(column['exam']):
-            exam = "Да"
+            exam = f"\n📌 Экзамен: {exam}"
 
         message += (f"🕒 Пара: {column['number']} ({column['shift']})\n"
                     f"🏢 Кабинет: {column['cabinet']}\n"
-                    f"👤 Группа: {column['group_name']}\n"
-                    f"👥 Экзамен: {exam}"
+                    f"👥 Группа: {column['group_name']}"
+                    f"{exam}"
                     f"\n\n")
 
     return message
