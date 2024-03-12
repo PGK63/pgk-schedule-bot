@@ -73,12 +73,14 @@ async def teacher_input_first_name(message: types.Message, state: FSMContext):
 async def teacher_input_last_name(message: types.Message, state: FSMContext):
     last_name = message.text
 
-    await message.answer('🏫 Напишите свой кабинет', reply_markup=ReplyKeyboardMarkup(
+    await message.answer('🏫 Напишите свой кабинет или выберите из списка', reply_markup=ReplyKeyboardMarkup(
         one_time_keyboard=True,
         resize_keyboard=True,
         keyboard=[
             [
-                KeyboardButton("У меня нет кабинета")
+                KeyboardButton("Физ-ра"),
+                KeyboardButton("Кр.пол"),
+                KeyboardButton("У меня нет кабинета"),
             ]
         ]))
     await state.update_data(last_name=last_name)

@@ -52,7 +52,7 @@ def teacher_get_schedules_message(chat_id, schedule_id) -> str:
     for column in json['columns']:
         exam = ''
         if bool(column['exam']):
-            exam = f"\n📌 Экзамен: {exam}"
+            exam = f"\n📌 Экзамен"
 
         message += (f"🕒 Пара: {column['number']} ({column['shift']})\n"
                     f"🏢 Кабинет: {column['cabinet']}\n"
