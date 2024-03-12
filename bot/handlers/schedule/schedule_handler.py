@@ -5,28 +5,25 @@ from aiogram.utils.callback_data import CallbackData
 from bot.common.date import transform_date
 from database.schedule.schedule_datastore import get_schedules_by_dep_id, student_get_schedules_message, \
     teacher_get_schedules_message
-from database.user.user_datastore import get_user_by_chat_id, get_role_by_chat_id
+from database.user.user_datastore import get_role_by_chat_id
 
 schedule_callback = CallbackData('schedule_id_callback', 'id', 'c_id')
 
 
 async def schedules_message(message: types.Message):
-    user = get_user_by_chat_id(message.chat.id)
+    schedules = get_schedules_by_dep_id(1)
+    schedules_inline_keyboard = []
 
-    if user:
-        schedules = get_schedules_by_dep_id(1)
-        schedules_inline_keyboard = []
+    for schedule in schedules:
+        schedules_inline_keyboard.append([
+            InlineKeyboardButton(
+                transform_date(str(schedule['date'])),
+                callback_data=schedule_callback.new(id=schedule['id'], c_id=message.chat.id)
+            )
+        ])
 
-        for schedule in schedules:
-            schedules_inline_keyboard.append([
-                InlineKeyboardButton(
-                    transform_date(str(schedule['date'])),
-                    callback_data=schedule_callback.new(id=schedule['id'], c_id=message.chat.id)
-                )
-            ])
-
-        await message.answer('📅 Выберите день',
-                             reply_markup=InlineKeyboardMarkup(row_width=1, inline_keyboard=schedules_inline_keyboard))
+    await message.answer('📅 Выберите день',
+                         reply_markup=InlineKeyboardMarkup(row_width=1, inline_keyboard=schedules_inline_keyboard))
 
 
 async def schedule_callback_message(call: types.CallbackQuery, callback_data: dict):

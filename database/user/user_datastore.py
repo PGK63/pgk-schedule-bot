@@ -3,9 +3,9 @@ import requests
 from database.common.constants import BASE_URL
 
 
-def get_user_by_chat_id(c_id):
-    response = requests.get(f"{BASE_URL}/students/by-telegram-id/{c_id}")
-    return response.json()
+def user_exist(c_id):
+    response = requests.get(f"{BASE_URL}/users/by-telegram-id/{c_id}/exist")
+    return response.text == "true"
 
 
 def create_student(chat_id, group, department_id):

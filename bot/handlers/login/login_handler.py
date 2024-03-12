@@ -8,7 +8,8 @@ from aiogram.utils.callback_data import CallbackData
 from bot.handlers.login.states.student_login_state import StudentLoginState
 from bot.handlers.login.states.teacher_login_state import TeacherLoginState
 from database.department.department_datastore import get_departments
-from database.user.user_datastore import create_student, create_teacher, get_user_by_chat_id, delete_user_by_chat_id
+from database.user.user_datastore import create_student, create_teacher, delete_user_by_chat_id, \
+    user_exist
 
 user_role_callback = CallbackData('user_role_callback', 'role')
 department_callback = CallbackData('department_callback', 'id', 'user_role')
@@ -19,7 +20,7 @@ sticker_ok_id = 'CAACAgIAAxkBAAELbFpl0JlB7s_u0DV0-IY2PzdY-ZpXbAACogEAAhZCawqhd3d
 
 
 async def login(message: types.Message):
-    user = get_user_by_chat_id(message.chat.id)
+    user = user_exist(message.chat.id)
 
     if not user:
         await message.answer_sticker(sticker_hello_id)
@@ -73,14 +74,17 @@ async def teacher_input_first_name(message: types.Message, state: FSMContext):
 async def teacher_input_last_name(message: types.Message, state: FSMContext):
     last_name = message.text
 
-    await message.answer('🏫 Напишите свой кабинет или выберите из списка', reply_markup=ReplyKeyboardMarkup(
+    await message.answer('🏫 Напишите свой кабинет в формате 301/4 или выберите из списка', reply_markup=ReplyKeyboardMarkup(
         one_time_keyboard=True,
         resize_keyboard=True,
         keyboard=[
             [
                 KeyboardButton("Физ-ра"),
-                KeyboardButton("Кр.пол"),
-                KeyboardButton("У меня нет кабинета"),
+                KeyboardButton("Кр.пол")
+            ],
+            [
+
+                KeyboardButton("У меня нет кабинета")
             ]
         ]))
     await state.update_data(last_name=last_name)
