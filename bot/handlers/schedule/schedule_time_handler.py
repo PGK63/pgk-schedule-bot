@@ -2,7 +2,7 @@ from aiogram import types, Dispatcher
 
 
 async def schedule_time(message: types.Message):
-    await message.answer('🕘 <b>Расписание звонков 1 Смена</b>\n\n'
+    await message.answer('🕘 <b>1 Смена</b>\n\n'
                          '1 пара 08:30-09:50\n'
                          '2 пара 10:00-11:20\n'
                          'Обед 11:20-12:00\n'
@@ -10,7 +10,7 @@ async def schedule_time(message: types.Message):
                          '4 пара 13:30-14:50\n'
                          '5 пара 15:00-16:20\n'
                          '\n'
-                         '🕘 <b>Расписание звонков 2 Смена</b>\n\n'
+                         '🕘 <b>2 Смена</b>\n\n'
                          '1 пара 13:30-14:50\n'
                          '2 пара 15:00-16:20\n'
                          '3 пара 16:35-17:55\n'
