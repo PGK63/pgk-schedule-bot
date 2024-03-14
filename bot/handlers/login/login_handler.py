@@ -157,6 +157,9 @@ def get_default_reply_markup():
     return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1, keyboard=[
         [
             KeyboardButton('Расписание 🕘')
+        ],
+        [
+            KeyboardButton('Расписание звонков 🕘')
         ]
     ])
 
