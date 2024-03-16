@@ -12,9 +12,10 @@ def get_schedules_by_dep_id(department_id):
 
 
 def student_get_schedules_message(chat_id, schedule_id) -> str:
-    json = requests.get(f'{BASE_URL}/schedules/{schedule_id}/student/by-telegram-id/{chat_id}').json()
-    if not json:
-        return "Расписание отсутствует"
+    response = requests.get(f'{BASE_URL}/schedules/{schedule_id}/student/by-telegram-id/{chat_id}')
+    json = response.json()
+    if response.status_code != 200 or json is None:
+        return "Пар нет 🥳"
 
     date = datetime.strptime(json['date'], '%Y-%m-%d').date()
     date = date.strftime('%d-%m-%Y')
@@ -41,9 +42,10 @@ def student_get_schedules_message(chat_id, schedule_id) -> str:
 
 
 def teacher_get_schedules_message(chat_id, schedule_id) -> str:
-    json = requests.get(f'{BASE_URL}/schedules/{schedule_id}/teacher/by-telegram-id/{chat_id}').json()
-    if not json:
-        return "Расписание отсутствует"
+    response = requests.get(f'{BASE_URL}/schedules/{schedule_id}/teacher/by-telegram-id/{chat_id}')
+    json = response.json()
+    if response.status_code != 200 or json is None:
+        return "Пар нет 🥳"
 
     date = datetime.strptime(json['date'], '%Y-%m-%d').date()
     date = date.strftime('%d-%m-%Y')
