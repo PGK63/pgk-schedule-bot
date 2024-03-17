@@ -14,7 +14,8 @@ async def schedule_time(message: types.Message):
                          '1 пара 13:30-14:50\n'
                          '2 пара 15:00-16:20\n'
                          '3 пара 16:35-17:55\n'
-                         '4 пара 18:05-19:25\n')
+                         '4 пара 18:05-19:25\n',
+                         disable_notification=True)
 
 
 def register_schedule_time_handler(dp: Dispatcher):

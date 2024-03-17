@@ -10,7 +10,7 @@ async def errors_handler(update, exception):
                                           MessageTextIsEmpty, RetryAfter,
                                           CantParseEntities, MessageCantBeDeleted, BadRequest)
 
-    await Update.get_current().message.reply('Ошибка: {}'.format(exception))
+    await Update.get_current().message.reply(f'Ошибка: {exception}', disable_notification=True)
 
     if isinstance(exception, CantDemoteChatCreator):
         logging.debug("Can`t demote chat creator")

@@ -23,9 +23,10 @@ async def login(message: types.Message):
     user = user_exist(message.chat.id)
 
     if not user:
-        await message.answer_sticker(sticker_hello_id)
+        await message.answer_sticker(sticker_hello_id, disable_notification=True)
         await message.answer(
             text="Вы студент или преподаватель?",
+            disable_notification=True,
             reply_markup=types.InlineKeyboardMarkup(
                 row_width=1,
                 inline_keyboard=[
@@ -45,6 +46,7 @@ async def login(message: types.Message):
     else:
         await message.answer(
             'Необходимо выйти из учетной записи',
+            disable_notification=True,
             reply_markup=InlineKeyboardMarkup(row_width=1, inline_keyboard=[
                 [
                     InlineKeyboardButton('Выйти', callback_data=sign_out_callback.new())
@@ -56,17 +58,18 @@ async def login(message: types.Message):
 async def role_callback(call: types.CallbackQuery, callback_data: dict):
     role = callback_data.get('role')
     if role == 'teacher':
-        await call.message.answer('🖍 Введите имя')
+        await call.message.answer('🖍 Введите имя', disable_notification=True)
         await TeacherLoginState.InputFirstName.set()
     elif role == 'student':
-        await call.message.answer('🏫 Выберите отделение', reply_markup=get_departments_reply_markup('student'))
+        await call.message.answer('🏫 Выберите отделение', disable_notification=True,
+                                  reply_markup=get_departments_reply_markup('student'))
         await StudentLoginState.InputDepartment.set()
 
 
 async def teacher_input_first_name(message: types.Message, state: FSMContext):
     first_name = message.text
 
-    await message.answer('🖍 Введите фамилию')
+    await message.answer('🖍 Введите фамилию', disable_notification=True)
     await state.update_data(first_name=first_name)
     await TeacherLoginState.next()
 
@@ -74,19 +77,20 @@ async def teacher_input_first_name(message: types.Message, state: FSMContext):
 async def teacher_input_last_name(message: types.Message, state: FSMContext):
     last_name = message.text
 
-    await message.answer('🏫 Напишите свой кабинет в формате 301/4 или выберите из списка', reply_markup=ReplyKeyboardMarkup(
-        one_time_keyboard=True,
-        resize_keyboard=True,
-        keyboard=[
-            [
-                KeyboardButton("Физ-ра"),
-                KeyboardButton("Кр.пол")
-            ],
-            [
+    await message.answer('🏫 Напишите свой кабинет в формате 301/4 или выберите из списка', disable_notification=True,
+                         reply_markup=ReplyKeyboardMarkup(
+                             one_time_keyboard=True,
+                             resize_keyboard=True,
+                             keyboard=[
+                                 [
+                                     KeyboardButton("Физ-ра"),
+                                     KeyboardButton("Кр.пол")
+                                 ],
+                                 [
 
-                KeyboardButton("У меня нет кабинета")
-            ]
-        ]))
+                                     KeyboardButton("У меня нет кабинета")
+                                 ]
+                             ]))
     await state.update_data(last_name=last_name)
     await TeacherLoginState.next()
 
@@ -96,7 +100,8 @@ async def teacher_input_cabinet(message: types.Message, state: FSMContext):
     if cabinet == 'У меня нет кабинета':
         cabinet = None
 
-    await message.answer('🏫 Выберите отделение', reply_markup=get_departments_reply_markup('teacher'))
+    await message.answer('🏫 Выберите отделение', disable_notification=True,
+                         reply_markup=get_departments_reply_markup('teacher'))
     await state.update_data(cabinet=cabinet)
     await TeacherLoginState.next()
 
@@ -116,14 +121,15 @@ async def teacher_input_department(call: types.CallbackQuery, callback_data: dic
 
     create_teacher(call.message.chat.id, first_name, last_name, department_id, cabinet)
     await state.finish()
-    await call.message.answer_sticker(sticker_ok_id, reply_markup=get_default_reply_markup())
+    await call.message.answer_sticker(sticker_ok_id, disable_notification=True, reply_markup=get_default_reply_markup())
 
 
 async def student_input_department(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     department_id = callback_data.get('id')
     user_role = callback_data.get('user_role')
 
-    await call.message.answer('🏫 Отправьте название группы в формате примера\nПример: ИСП-34')
+    await call.message.answer('🏫 Отправьте название группы в формате примера\nПример: ИСП-34',
+                              disable_notification=True)
     await state.update_data(department_id=department_id, user_role=user_role)
     await StudentLoginState.next()
 
@@ -135,7 +141,7 @@ async def student_input_group(message: types.Message, state: FSMContext):
         state_data = await state.get_data()
         department_id = state_data.get('department_id')
         create_student(message.chat.id, group_name, department_id)
-        await message.answer_sticker(sticker_ok_id, reply_markup=get_default_reply_markup())
+        await message.answer_sticker(sticker_ok_id, reply_markup=get_default_reply_markup(), disable_notification=True)
         await state.finish()
     else:
         await message.answer('❌ Неверный формат группы')
@@ -166,7 +172,7 @@ def get_default_reply_markup():
 
 async def sign_out(call: types.CallbackQuery):
     delete_user_by_chat_id(call.message.chat.id)
-    await call.message.answer('Успешно', reply_markup=types.ReplyKeyboardRemove())
+    await call.message.answer('Успешно', disable_notification=True, reply_markup=types.ReplyKeyboardRemove())
 
 
 def register_login(dp: Dispatcher):

@@ -23,7 +23,7 @@ async def schedules_message(message: types.Message):
             )
         ])
 
-    await message.answer('📅 Выберите день',
+    await message.answer('📅 Выберите день', disable_notification=True,
                          reply_markup=InlineKeyboardMarkup(row_width=1, inline_keyboard=schedules_inline_keyboard))
 
 
@@ -38,7 +38,7 @@ async def schedule_callback_message(call: types.CallbackQuery, callback_data: di
     elif role == "TEACHER":
         message = teacher_get_schedules_message(c_id, schedule_id)
 
-    await call.message.answer(message, reply_markup=get_default_reply_markup())
+    await call.message.answer(message, disable_notification=True, reply_markup=get_default_reply_markup())
 
 
 def register_schedule(dp: Dispatcher):
