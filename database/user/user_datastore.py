@@ -38,3 +38,11 @@ def delete_user_by_chat_id(c_id):
 
 def get_role_by_chat_id(c_id):
     return requests.get(f"{BASE_URL}/users/role/by-telegram-id/{c_id}")
+
+
+def get_teacher_by_chat_id(c_id):
+    return requests.get(f"{BASE_URL}/teachers/by-telegram-id/{c_id}")
+
+
+def get_student_by_chat_id(c_id):
+    return requests.get(f"{BASE_URL}/students/by-telegram-id/{c_id}")

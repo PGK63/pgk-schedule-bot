@@ -25,7 +25,7 @@ async def login(message: types.Message):
     if not user:
         await message.answer_sticker(sticker_hello_id)
         await message.answer(
-            text="Выберите роль",
+            text="Вы студент или преподаватель?",
             reply_markup=types.InlineKeyboardMarkup(
                 row_width=1,
                 inline_keyboard=[

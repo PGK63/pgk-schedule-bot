@@ -7,6 +7,7 @@ async def set_default_commands(bot: Bot):
     return await bot.set_my_commands(
         commands=[
             BotCommand('start', 'Перезапустить бот 📌'),
+            BotCommand('profile', 'Информация о регистрации 👤'),
         ],
         scope=BotCommandScopeDefault()
     )
