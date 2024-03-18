@@ -1,4 +1,5 @@
 import asyncio
+import locale
 
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -27,7 +28,7 @@ def register_all_handlers():
 
 
 def on_startup():
-    pass
+    locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 
 async def main():

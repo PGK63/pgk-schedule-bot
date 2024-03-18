@@ -19,7 +19,7 @@ def student_get_schedules_message(chat_id, schedule_id) -> str:
         return json['message']
 
     date = datetime.strptime(json['date'], '%Y-%m-%d').date()
-    date = date.strftime('%d-%m-%Y')
+    date = date.strftime('%a, %d %B %Y').capitalize()
     message = f"<i><b><u>{date} ({json['shift']})</u></b></i>\n\n"
 
     for column in json['columns']:
@@ -36,8 +36,8 @@ def student_get_schedules_message(chat_id, schedule_id) -> str:
 
         message += (f"{number}\n"
                     f"🏢 Кабинет: {cabinet}\n"
-                    f"👤 Преподаватель: {teacher}\n"
-                    f"\n\n")
+                    f"👤 {teacher}\n"
+                    f"\n")
 
     return message
 
@@ -50,7 +50,7 @@ def teacher_get_schedules_message(chat_id, schedule_id) -> str:
         return json['message']
 
     date = datetime.strptime(json['date'], '%Y-%m-%d').date()
-    date = date.strftime('%d-%m-%Y')
+    date = date.strftime('%a, %d %B %Y').capitalize()
     message = f"<i><b><u>{date}</u></b></i>\n\n"
 
     for column in json['columns']:
