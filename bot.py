@@ -28,7 +28,8 @@ def register_all_handlers():
 
 
 def on_startup():
-    locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
+    pass
+    # locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
 
 
 async def main():
