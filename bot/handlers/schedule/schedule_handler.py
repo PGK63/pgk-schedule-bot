@@ -1,8 +1,9 @@
+from datetime import datetime
+
 from aiogram import Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.callback_data import CallbackData
 
-from bot.common.date import transform_date
 from bot.handlers.login.login_handler import get_default_reply_markup
 from database.schedule.schedule_datastore import get_schedules_by_dep_id, student_get_schedules_message, \
     teacher_get_schedules_message
@@ -38,9 +39,11 @@ def get_schedules_keyboard(dep_id, page, c_id):
     schedules_inline_keyboard = []
 
     for schedule in schedules['content']:
+        date = datetime.strptime(schedule['date'], '%Y-%m-%d').date()
+        date = date.strftime('%a, %d %B %Y').capitalize()
         schedules_inline_keyboard.append([
             InlineKeyboardButton(
-                transform_date(str(schedule['date'])),
+                text=date,
                 callback_data=schedule_callback.new(id=schedule['id'], c_id=c_id)
             )
         ])

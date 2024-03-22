@@ -51,17 +51,18 @@ def teacher_get_schedules_message(chat_id, schedule_id) -> str:
 
     date = datetime.strptime(json['date'], '%Y-%m-%d').date()
     date = date.strftime('%a, %d %B %Y').capitalize()
-    message = f"<i><b><u>{date}</u></b></i>\n\n"
+    message = f"<i><b><u>{date}</u></b></i>\n"
 
-    for column in json['columns']:
-        exam = ''
-        if bool(column['exam']):
-            exam = f"\n📌 Экзамен"
+    for row in json['rows']:
+        message += f"\n👥 <b>{row['group_name']} ({row['shift']})</b>\n"
 
-        message += (f"🕒 Пара: {column['number']} ({column['shift']})\n"
-                    f"🏢 Кабинет: {column['cabinet']}\n"
-                    f"👥 Группа: {column['group_name']}"
-                    f"{exam}"
-                    f"\n\n")
+        for column in row['columns']:
+            exam = ''
+            if bool(column['exam']):
+                exam = f"\n📌 Экзамен"
+
+            message += (f"🕒 Пара: {column['number']}\n"
+                        f"🏢 Кабинет: {column['cabinet']}\n"
+                        f"{exam}")
 
     return message
