@@ -4,8 +4,8 @@ from datetime import datetime
 from database.common.constants import BASE_URL
 
 
-def get_schedules_by_dep_id(department_id):
-    response = requests.get(f"{BASE_URL}/schedules?departmentId={department_id}")
+def get_schedules_by_dep_id(department_id, page):
+    response = requests.get(f"{BASE_URL}/schedules?departmentId={department_id}&offset={page}")
     if response.status_code == 200:
         return response.json()
     return None

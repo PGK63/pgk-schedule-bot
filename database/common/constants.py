@@ -1,1 +1,1 @@
-BASE_URL = 'http://api.danbel.ru/pgk/schedule'
+BASE_URL = 'http://localhost:10025/pgk/schedule'
