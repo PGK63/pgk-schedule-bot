@@ -1,18 +1,22 @@
 import requests
 from datetime import datetime
 
-from database.common.constants import BASE_URL
+from database.common.constants import BASE_URL, API_TOKEN
 
 
 def get_schedules_by_dep_id(department_id, page):
-    response = requests.get(f"{BASE_URL}/schedules?departmentId={department_id}&offset={page}")
+    response = requests.get(f"{BASE_URL}/schedules?departmentId={department_id}&offset={page}", headers={
+        'X-API-KEY': API_TOKEN
+    })
     if response.status_code == 200:
         return response.json()
     return None
 
 
 def student_get_schedules_message(chat_id, schedule_id) -> str:
-    response = requests.get(f'{BASE_URL}/schedules/{schedule_id}/student/by-telegram-id/{chat_id}')
+    response = requests.get(f'{BASE_URL}/schedules/{schedule_id}/student/by-telegram-id/{chat_id}', headers={
+        'X-API-KEY': API_TOKEN
+    })
     json = response.json()
 
     if response.status_code != 200:
@@ -43,9 +47,11 @@ def student_get_schedules_message(chat_id, schedule_id) -> str:
 
 
 def teacher_get_schedules_message(chat_id, schedule_id) -> str:
-    response = requests.get(f'{BASE_URL}/schedules/{schedule_id}/teacher/by-telegram-id/{chat_id}')
+    response = requests.get(f'{BASE_URL}/schedules/{schedule_id}/teacher/by-telegram-id/{chat_id}', headers={
+        'X-API-KEY': API_TOKEN
+    })
     json = response.json()
-
+    
     if response.status_code != 200:
         return json['message']
 

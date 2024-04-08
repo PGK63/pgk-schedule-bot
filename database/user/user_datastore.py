@@ -1,11 +1,16 @@
 import requests
 
-from database.common.constants import BASE_URL
+from database.common.constants import BASE_URL, API_TOKEN
+
+
+def get_user_by_c_id(chat_id):
+    return requests.get(f"{BASE_URL}/users/by-telegram-id/{chat_id}", headers={
+        'X-API-KEY': API_TOKEN
+    })
 
 
 def user_exist(c_id):
-    response = requests.get(f"{BASE_URL}/users/by-telegram-id/{c_id}/exist")
-    return response.text == "true"
+    return get_user_by_c_id(c_id).status_code == 200
 
 
 def create_student(chat_id, group, department_id):
@@ -13,36 +18,37 @@ def create_student(chat_id, group, department_id):
         "groupName": group,
         "departmentId": department_id,
     }
-    response = requests.post(f"{BASE_URL}/students/telegram/{chat_id}", json=student_data)
+    response = requests.post(f"{BASE_URL}/students/telegram/{chat_id}", json=student_data, headers={
+        'X-API-KEY': API_TOKEN
+    })
     if response.status_code == 201:
+        print(response.json())
         return response.json()
     return None
 
 
-def create_teacher(chat_id, first_name, last_name, department_id, cabinet):
-    user_data = {
-        "firstName": first_name,
-        "lastName": last_name,
-        "cabinet": cabinet,
-        "departmentId": department_id
-    }
-    response = requests.post(f"{BASE_URL}/teachers/telegram/{chat_id}", json=user_data)
+def create_teacher(chat_id, teacher_id):
+    response = requests.post(f"{BASE_URL}/teacher/{teacher_id}/user/by-telegram-id/{chat_id}", headers={
+        'X-API-KEY': API_TOKEN
+    })
     if response.status_code == 201:
         return response.json()
     return None
 
 
 def delete_user_by_chat_id(c_id):
-    requests.delete(f"{BASE_URL}/users/by-telegram-id/{c_id}")
-
-
-def get_role_by_chat_id(c_id):
-    return requests.get(f"{BASE_URL}/users/role/by-telegram-id/{c_id}")
+    requests.delete(f"{BASE_URL}/users/by-telegram-id/{c_id}", headers={
+        'X-API-KEY': API_TOKEN
+    })
 
 
 def get_teacher_by_chat_id(c_id):
-    return requests.get(f"{BASE_URL}/teachers/by-telegram-id/{c_id}")
+    return requests.get(f"{BASE_URL}/teachers/by-telegram-id/{c_id}", headers={
+        'X-API-KEY': API_TOKEN
+    })
 
 
 def get_student_by_chat_id(c_id):
-    return requests.get(f"{BASE_URL}/students/by-telegram-id/{c_id}")
+    return requests.get(f"{BASE_URL}/students/by-telegram-id/{c_id}", headers={
+        'X-API-KEY': API_TOKEN
+    })

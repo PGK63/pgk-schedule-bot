@@ -8,11 +8,13 @@ from aiogram.utils.callback_data import CallbackData
 from bot.handlers.login.states.student_login_state import StudentLoginState
 from bot.handlers.login.states.teacher_login_state import TeacherLoginState
 from database.department.department_datastore import get_departments
+from database.teacher.teacher_datastore import get_teachers, teacher_get_fio
 from database.user.user_datastore import create_student, create_teacher, delete_user_by_chat_id, \
     user_exist
 
 user_role_callback = CallbackData('user_role_callback', 'role')
 department_callback = CallbackData('department_callback', 'id', 'user_role')
+teacher_callback = CallbackData('teacher_callback', 'id')
 sign_out_callback = CallbackData('sign_out_callback')
 
 sticker_hello_id = 'CAACAgIAAxkBAAELbFZl0Jiomdm00O5xdLWWiTkH9WnAQwACxgEAAhZCawpKI9T0ydt5RzQE'
@@ -58,70 +60,36 @@ async def login(message: types.Message):
 async def role_callback(call: types.CallbackQuery, callback_data: dict):
     role = callback_data.get('role')
     if role == 'teacher':
-        await call.message.answer('🖍 Введите имя', disable_notification=True)
-        await TeacherLoginState.InputFirstName.set()
+        await call.message.answer(
+            "✏️ Отправьте вашу фамилию (имя отчество по желанию)",
+            disable_notification=True
+        )
+        await TeacherLoginState.InputName.set()
     elif role == 'student':
         await call.message.answer('🏫 Выберите отделение', disable_notification=True,
                                   reply_markup=get_departments_reply_markup('student'))
         await StudentLoginState.InputDepartment.set()
 
 
-async def teacher_input_first_name(message: types.Message, state: FSMContext):
-    first_name = message.text
-
-    await message.answer('🖍 Введите фамилию', disable_notification=True)
-    await state.update_data(first_name=first_name)
-    await TeacherLoginState.next()
-
-
-async def teacher_input_last_name(message: types.Message, state: FSMContext):
-    last_name = message.text
-
-    await message.answer('🏫 Напишите свой кабинет в формате 301/4 или выберите из списка', disable_notification=True,
-                         reply_markup=ReplyKeyboardMarkup(
-                             one_time_keyboard=True,
-                             resize_keyboard=True,
-                             keyboard=[
-                                 [
-                                     KeyboardButton("Физ-ра"),
-                                     KeyboardButton("Кр.пол")
-                                 ],
-                                 [
-
-                                     KeyboardButton("У меня нет кабинета")
-                                 ]
-                             ]))
-    await state.update_data(last_name=last_name)
-    await TeacherLoginState.next()
-
-
-async def teacher_input_cabinet(message: types.Message, state: FSMContext):
-    cabinet = message.text
-    if cabinet == 'У меня нет кабинета':
-        cabinet = None
-
-    await message.answer('🏫 Выберите отделение', disable_notification=True,
-                         reply_markup=get_departments_reply_markup('teacher'))
-    await state.update_data(cabinet=cabinet)
-    await TeacherLoginState.next()
-
-
-async def teacher_input_department(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
-    state_data = await state.get_data()
-
-    department_id = callback_data.get('id')
-    last_name = state_data.get('last_name')
-    first_name = state_data.get('first_name')
-    cabinet = None
-
-    try:
-        cabinet = state_data.get('cabinet')
-    except Exception:
-        pass
-
-    create_teacher(call.message.chat.id, first_name, last_name, department_id, cabinet)
+async def input_teacher_id(message: types.Message, state: FSMContext):
     await state.finish()
-    await call.message.answer_sticker(sticker_ok_id, disable_notification=True, reply_markup=get_default_reply_markup())
+    await message.answer(
+        "👤 Выберите свое ФИО из списка\n\nНажмите 'Назад', чтобы попробовать еще раз",
+        disable_notification=True,
+        reply_markup=get_teachers_reply_markup(name=message.text)
+    )
+
+
+async def teacher_final_create(call: types.CallbackQuery, callback_data: dict):
+    teacher_id = callback_data.get('id')
+    if teacher_id == "back":
+        await call.message.edit_text(
+            "✏️ Отправьте вашу фамилию (имя отчество по желанию)"
+        )
+        await TeacherLoginState.InputName.set()
+    else:
+        create_teacher(call.message.chat.id, teacher_id)
+        await call.message.answer_sticker(sticker_ok_id, disable_notification=True, reply_markup=get_default_reply_markup())
 
 
 async def student_input_department(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
@@ -159,6 +127,20 @@ def get_departments_reply_markup(user_role):
     return InlineKeyboardMarkup(row_width=1, inline_keyboard=departments_inline_keyboard)
 
 
+def get_teachers_reply_markup(name):
+    teachers = get_teachers(name)
+    teachers_inline_keyboard = []
+
+    for teacher in teachers['content']:
+        teachers_inline_keyboard.append(
+            [InlineKeyboardButton(teacher_get_fio(teacher), callback_data=teacher_callback.new(id=teacher['id']))])
+
+    teachers_inline_keyboard.append(
+        [InlineKeyboardButton('Назад', callback_data=teacher_callback.new(id='back'))])
+
+    return InlineKeyboardMarkup(row_width=1, inline_keyboard=teachers_inline_keyboard)
+
+
 def get_default_reply_markup():
     return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=1, keyboard=[
         [
@@ -184,9 +166,5 @@ def register_login(dp: Dispatcher):
                                        state=StudentLoginState.InputDepartment)
 
     dp.register_message_handler(student_input_group, state=StudentLoginState.InputGroup)
-
-    dp.register_message_handler(teacher_input_first_name, state=TeacherLoginState.InputFirstName)
-    dp.register_message_handler(teacher_input_last_name, state=TeacherLoginState.InputLastName)
-    dp.register_message_handler(teacher_input_cabinet, state=TeacherLoginState.InputCabinet)
-    dp.register_callback_query_handler(teacher_input_department, department_callback.filter(),
-                                       state=TeacherLoginState.InputDepartment)
+    dp.register_message_handler(input_teacher_id, state=TeacherLoginState.InputName)
+    dp.register_callback_query_handler(teacher_final_create, teacher_callback.filter())
