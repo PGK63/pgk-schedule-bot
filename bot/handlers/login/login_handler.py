@@ -136,7 +136,8 @@ def get_teachers_reply_markup(name):
             [InlineKeyboardButton(teacher_get_fio(teacher), callback_data=teacher_callback.new(id=teacher['id']))])
 
     teachers_inline_keyboard.append(
-        [InlineKeyboardButton('Назад', callback_data=teacher_callback.new(id='back'))])
+        [InlineKeyboardButton('Назад', callback_data=teacher_callback.new(id='back'))]
+    )
 
     return InlineKeyboardMarkup(row_width=1, inline_keyboard=teachers_inline_keyboard)
 
@@ -147,7 +148,8 @@ def get_default_reply_markup():
             KeyboardButton('Расписание 🕘')
         ],
         [
-            KeyboardButton('Расписание звонков 🕘')
+            KeyboardButton('Расписание звонков 🕘'),
+            KeyboardButton('Поиск 🔎'),
         ]
     ])
 

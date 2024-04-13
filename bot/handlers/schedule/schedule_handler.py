@@ -5,8 +5,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.callback_data import CallbackData
 
 from bot.handlers.login.login_handler import get_default_reply_markup
-from database.schedule.schedule_datastore import get_schedules_by_dep_id, student_get_schedules_message, \
-    teacher_get_schedules_message
+from database.schedule.schedule_datastore import student_get_schedules_message, \
+    teacher_get_schedules_message, get_schedules_by_dep_id_str, department_id_to_str
 from database.user.user_datastore import get_user_by_c_id
 
 schedule_callback = CallbackData('schedule_id_callback', 'id', 'c_id')
@@ -15,23 +15,24 @@ schedule_action_callback = CallbackData('schedule_id_callback', 'action', 'page'
 
 async def schedules_message(message: types.Message):
     user_json = get_user_by_c_id(message.chat.id).json()
-    department_id = 1
+    department_id = []
 
     if user_json['role'] == 'TEACHER':
-        department_id = user_json['teacher']['department']['id']
+        department_id = user_json['teacher']['departments']
     elif user_json['role'] == 'STUDENT':
-        department_id = user_json['student']['department']['id']
+        department_id = user_json['teacher']['departments']
 
     await message.answer('📅 Выберите день', disable_notification=True,
                          reply_markup=InlineKeyboardMarkup(
-                             row_width=department_id, inline_keyboard=get_schedules_keyboard(1, 0, message.chat.id)))
+                             row_width=1, inline_keyboard=get_schedules_keyboard(department_id_to_str(department_id), 0, message.chat.id)))
 
 
 async def update_schedules(call: types.CallbackQuery, callback_data: dir):
     action = callback_data.get("action")
     current_page = int(callback_data.get("page"))
-    dep_id = callback_data.get("dep_id")
+    dep_id = str(callback_data.get("dep_id")).replace('_', ':')
     c_id = callback_data.get("c_id")
+
     if action == 'next':
         current_page += 1
     elif action == 'back':
@@ -43,15 +44,15 @@ async def update_schedules(call: types.CallbackQuery, callback_data: dir):
 
 
 def get_schedules_keyboard(dep_id, page, c_id):
-    schedules = get_schedules_by_dep_id(dep_id, page)
+    schedules = get_schedules_by_dep_id_str(dep_id, page)
     schedules_inline_keyboard = []
 
     for schedule in schedules['content']:
         date = datetime.strptime(schedule['date'], '%Y-%m-%d').date()
-        date = date.strftime('%a, %d %B %Y').capitalize()
+        text = date.strftime('%a, %d %B %Y').capitalize() + ", " + schedule['department']['name']
         schedules_inline_keyboard.append([
             InlineKeyboardButton(
-                text=date,
+                text=text,
                 callback_data=schedule_callback.new(id=schedule['id'], c_id=c_id)
             )
         ])

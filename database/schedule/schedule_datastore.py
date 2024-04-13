@@ -4,13 +4,27 @@ from datetime import datetime
 from database.common.constants import BASE_URL, API_TOKEN
 
 
-def get_schedules_by_dep_id(department_id, page):
-    response = requests.get(f"{BASE_URL}/schedules?departmentId={department_id}&offset={page}", headers={
+def department_id_to_str(department_ids):
+    return ','.join(str(dep['id']) for dep in department_ids)
+
+
+def get_schedules_by_dep_id_str(department_id_str, page):
+    url = f"{BASE_URL}/schedules?"
+    for dep_id in department_id_str:
+        url += f"departmentIds={dep_id}&"
+    url += f"offset={page}"
+
+    response = requests.get(url, headers={
         'X-API-KEY': API_TOKEN
     })
+
     if response.status_code == 200:
         return response.json()
     return None
+
+
+def get_schedules_by_dep_id(department_id, page):
+    return get_schedules_by_dep_id_str(department_id_to_str(department_id), page)
 
 
 def student_get_schedules_message(chat_id, schedule_id) -> str:
@@ -21,6 +35,9 @@ def student_get_schedules_message(chat_id, schedule_id) -> str:
 
     if response.status_code != 200:
         return json['message']
+
+    if len(json['columns']) == 0:
+        return "Пар нет 🎉"
 
     date = datetime.strptime(json['date'], '%Y-%m-%d').date()
     date = date.strftime('%a, %d %B %Y').capitalize()
@@ -51,9 +68,12 @@ def teacher_get_schedules_message(chat_id, schedule_id) -> str:
         'X-API-KEY': API_TOKEN
     })
     json = response.json()
-    
+
     if response.status_code != 200:
         return json['message']
+
+    if len(json['rows']) == 0:
+        return "Пар нет 🎉"
 
     date = datetime.strptime(json['date'], '%Y-%m-%d').date()
     date = date.strftime('%a, %d %B %Y').capitalize()

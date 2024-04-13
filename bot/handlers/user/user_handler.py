@@ -18,19 +18,26 @@ async def user_info(message: types.Message):
             teacher = json['teacher']
             cabinet = ''
 
-            try:
+            if teacher["cabinet"] is not None:
                 cabinet = f'Кабинет: {teacher["cabinet"]}\n'
-            except Exception:
-                pass
 
             await message.answer('Преподаватель 👨‍🏫\n\n'
                                  f'Имя: {teacher["firstName"]}\n'
                                  f'Фамилия: {teacher["lastName"]}\n'
                                  f'{cabinet}'
-                                 f'Отделения: {teacher["department"]["name"]}',
+                                 f'Отделения: {get_departments_text(teacher["departments"])}',
                                  disable_notification=True)
     else:
         await message.answer('Необходимо зарегистрироваться', disable_notification=True)
+
+
+def get_departments_text(departments):
+    departments_text = ''
+    for i, department in enumerate(departments):
+        departments_text += department['name']
+        if i < len(departments) - 1:
+            departments_text += ', '
+    return departments_text
 
 
 def register_user(dp: Dispatcher):
