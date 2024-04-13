@@ -27,6 +27,17 @@ def get_schedules_by_dep_id(department_id, page):
     return get_schedules_by_dep_id_str(department_id_to_str(department_id), page)
 
 
+def get_schedules_by_teacher_id(teacher_id, page):
+    url = f"{BASE_URL}/schedules/by-teacher-id/{teacher_id}?offset={page}"
+    response = requests.get(url, headers={
+        'X-API-KEY': API_TOKEN
+    })
+
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+
 def student_get_schedules_message(chat_id, schedule_id) -> str:
     response = requests.get(f'{BASE_URL}/schedules/{schedule_id}/student/by-telegram-id/{chat_id}', headers={
         'X-API-KEY': API_TOKEN
@@ -63,13 +74,22 @@ def student_get_schedules_message(chat_id, schedule_id) -> str:
     return message
 
 
-def teacher_get_schedules_message(chat_id, schedule_id) -> str:
+def teacher_get_schedules_message_by_teacher_id(schedule_id, teacher_id) -> str:
+    response = requests.get(f'{BASE_URL}/schedules/{schedule_id}/teacher/{teacher_id}', headers={
+        'X-API-KEY': API_TOKEN
+    })
+    return teacher_get_schedules_message(response.json(), response.status_code)
+
+
+def teacher_get_schedules_message_chat_id(chat_id, schedule_id) -> str:
     response = requests.get(f'{BASE_URL}/schedules/{schedule_id}/teacher/by-telegram-id/{chat_id}', headers={
         'X-API-KEY': API_TOKEN
     })
-    json = response.json()
+    return teacher_get_schedules_message(response.json(), response.status_code)
 
-    if response.status_code != 200:
+
+def teacher_get_schedules_message(json, status_code) -> str:
+    if status_code != 200:
         return json['message']
 
     if len(json['rows']) == 0:

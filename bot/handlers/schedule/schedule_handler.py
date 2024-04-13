@@ -6,11 +6,11 @@ from aiogram.utils.callback_data import CallbackData
 
 from bot.handlers.login.login_handler import get_default_reply_markup
 from database.schedule.schedule_datastore import student_get_schedules_message, \
-    teacher_get_schedules_message, get_schedules_by_dep_id_str, department_id_to_str
+    teacher_get_schedules_message_chat_id, get_schedules_by_dep_id_str, department_id_to_str
 from database.user.user_datastore import get_user_by_c_id
 
 schedule_callback = CallbackData('schedule_id_callback', 'id', 'c_id')
-schedule_action_callback = CallbackData('schedule_id_callback', 'action', 'page', 'dep_id', 'c_id')
+schedule_action_callback = CallbackData('schedule_id_callback', 'action', 'page', 'dep_id', 'c_id', 'teacher_id')
 
 
 async def schedules_message(message: types.Message):
@@ -24,13 +24,15 @@ async def schedules_message(message: types.Message):
 
     await message.answer('📅 Выберите день', disable_notification=True,
                          reply_markup=InlineKeyboardMarkup(
-                             row_width=1, inline_keyboard=get_schedules_keyboard(department_id_to_str(department_id), 0, message.chat.id)))
+                             row_width=1,
+                             inline_keyboard=get_schedules_keyboard_by_dep_id(department_id_to_str(department_id), 0,
+                                                                              message.chat.id)))
 
 
 async def update_schedules(call: types.CallbackQuery, callback_data: dir):
     action = callback_data.get("action")
     current_page = int(callback_data.get("page"))
-    dep_id = str(callback_data.get("dep_id")).replace('_', ':')
+    dep_id = str(callback_data.get("dep_id"))
     c_id = callback_data.get("c_id")
 
     if action == 'next':
@@ -40,11 +42,15 @@ async def update_schedules(call: types.CallbackQuery, callback_data: dir):
     await call.message.edit_text('📅 Выберите день', disable_web_page_preview=True,
                                  reply_markup=InlineKeyboardMarkup(
                                      row_width=1,
-                                     inline_keyboard=get_schedules_keyboard(dep_id, current_page, c_id)))
+                                     inline_keyboard=get_schedules_keyboard_by_dep_id(dep_id, current_page, c_id)))
 
 
-def get_schedules_keyboard(dep_id, page, c_id):
+def get_schedules_keyboard_by_dep_id(dep_id, page, chat_id):
     schedules = get_schedules_by_dep_id_str(dep_id, page)
+    return get_schedules_keyboard(schedules, page, chat_id, dep_id=dep_id)
+
+
+def get_schedules_keyboard(schedules, page, c_id, dep_id=0, teacher_id=0):
     schedules_inline_keyboard = []
 
     for schedule in schedules['content']:
@@ -61,7 +67,8 @@ def get_schedules_keyboard(dep_id, page, c_id):
         schedules_inline_keyboard.append({
             InlineKeyboardButton(
                 'Дальше ➡️',
-                callback_data=schedule_action_callback.new(action='next', page=page, dep_id=dep_id, c_id=c_id)
+                callback_data=schedule_action_callback.new(action='next', page=page, c_id=c_id, dep_id=dep_id,
+                                                           teacher_id=teacher_id)
             )
         })
 
@@ -69,7 +76,8 @@ def get_schedules_keyboard(dep_id, page, c_id):
         schedules_inline_keyboard.append({
             InlineKeyboardButton(
                 '⬅️ Назад',
-                callback_data=schedule_action_callback.new(action='back', page=page, dep_id=dep_id, c_id=c_id)
+                callback_data=schedule_action_callback.new(action='back', page=page, c_id=c_id, dep_id=dep_id,
+                                                           teacher_id=teacher_id)
             )
         })
 
@@ -86,7 +94,7 @@ async def schedule_callback_message(call: types.CallbackQuery, callback_data: di
     if role == "STUDENT":
         message = student_get_schedules_message(c_id, schedule_id)
     elif role == "TEACHER":
-        message = teacher_get_schedules_message(c_id, schedule_id)
+        message = teacher_get_schedules_message_chat_id(c_id, schedule_id)
 
     await call.message.answer(message, disable_notification=True, reply_markup=get_default_reply_markup())
 
