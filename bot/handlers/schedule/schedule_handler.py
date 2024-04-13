@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.callback_data import CallbackData
 
 from bot.handlers.login.login_handler import get_default_reply_markup
-from database.schedule.schedule_datastore import student_get_schedules_message, \
+from database.schedule.schedule_datastore import student_get_schedules_message_chat_id, \
     teacher_get_schedules_message_chat_id, get_schedules_by_dep_id_str, department_id_to_str
 from database.user.user_datastore import get_user_by_c_id
 
@@ -92,7 +92,7 @@ async def schedule_callback_message(call: types.CallbackQuery, callback_data: di
     message = ''
 
     if role == "STUDENT":
-        message = student_get_schedules_message(c_id, schedule_id)
+        message = student_get_schedules_message_chat_id(c_id, schedule_id)
     elif role == "TEACHER":
         message = teacher_get_schedules_message_chat_id(c_id, schedule_id)
 
