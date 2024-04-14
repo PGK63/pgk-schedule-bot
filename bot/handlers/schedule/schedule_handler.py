@@ -10,7 +10,7 @@ from database.schedule.schedule_datastore import student_get_schedules_message_c
 from database.user.user_datastore import get_user_by_c_id
 
 schedule_callback = CallbackData('schedule_id_callback', 'id', 'c_id', 'teacher_id', 'group_name')
-schedule_action_callback = CallbackData('schedule_id_callback', 'action', 'page', 'dep_id', 'c_id')
+schedule_action_callback = CallbackData('schedule_action_callback', 'action', 'page', 'dep_id', 'c_id')
 
 
 async def schedules_message(message: types.Message):
