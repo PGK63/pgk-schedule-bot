@@ -9,8 +9,8 @@ from database.schedule.schedule_datastore import student_get_schedules_message_c
     teacher_get_schedules_message_chat_id, get_schedules_by_dep_id_str, department_id_to_str
 from database.user.user_datastore import get_user_by_c_id
 
-schedule_callback = CallbackData('schedule_id_callback', 'id', 'c_id')
-schedule_action_callback = CallbackData('schedule_id_callback', 'action', 'page', 'dep_id', 'c_id', 'teacher_id')
+schedule_callback = CallbackData('schedule_id_callback', 'id', 'c_id', 'teacher_id', 'group_name')
+schedule_action_callback = CallbackData('schedule_id_callback', 'action', 'page', 'dep_id', 'c_id')
 
 
 async def schedules_message(message: types.Message):
@@ -20,7 +20,7 @@ async def schedules_message(message: types.Message):
     if user_json['role'] == 'TEACHER':
         department_id = user_json['teacher']['departments']
     elif user_json['role'] == 'STUDENT':
-        department_id = user_json['teacher']['departments']
+        department_id.append(user_json['student']['department'])
 
     await message.answer('📅 Выберите день', disable_notification=True,
                          reply_markup=InlineKeyboardMarkup(
@@ -35,9 +35,9 @@ async def update_schedules(call: types.CallbackQuery, callback_data: dir):
     dep_id = str(callback_data.get("dep_id"))
     c_id = callback_data.get("c_id")
 
-    if action == 'next':
+    if action == 'n':
         current_page += 1
-    elif action == 'back':
+    elif action == 'b':
         current_page -= 1
     await call.message.edit_text('📅 Выберите день', disable_web_page_preview=True,
                                  reply_markup=InlineKeyboardMarkup(
@@ -47,10 +47,23 @@ async def update_schedules(call: types.CallbackQuery, callback_data: dir):
 
 def get_schedules_keyboard_by_dep_id(dep_id, page, chat_id):
     schedules = get_schedules_by_dep_id_str(dep_id, page)
-    return get_schedules_keyboard(schedules, page, chat_id, dep_id=dep_id)
+    return get_schedules_keyboard(schedules, chat_id,
+                                  next_action_callback_new=schedule_action_callback.new(
+                                      action='n', page=page, c_id=chat_id, dep_id=dep_id),
+                                  back_action_callback_new=schedule_action_callback.new(
+                                      action='b', page=page, c_id=chat_id, dep_id=dep_id)
+                                  )
 
 
-def get_schedules_keyboard(schedules, page, c_id, dep_id=0, teacher_id=0):
+def get_schedules_keyboard(
+        schedules,
+        c_id,
+        next_action_callback_new,
+        back_action_callback_new,
+        teacher_id=0,
+        group_name='',
+        schedule_callback_data=schedule_callback,
+):
     schedules_inline_keyboard = []
 
     for schedule in schedules['content']:
@@ -59,7 +72,8 @@ def get_schedules_keyboard(schedules, page, c_id, dep_id=0, teacher_id=0):
         schedules_inline_keyboard.append([
             InlineKeyboardButton(
                 text=text,
-                callback_data=schedule_callback.new(id=schedule['id'], c_id=c_id)
+                callback_data=schedule_callback_data.new(id=schedule['id'], c_id=c_id, teacher_id=teacher_id,
+                                                         group_name=group_name)
             )
         ])
 
@@ -67,8 +81,7 @@ def get_schedules_keyboard(schedules, page, c_id, dep_id=0, teacher_id=0):
         schedules_inline_keyboard.append({
             InlineKeyboardButton(
                 'Дальше ➡️',
-                callback_data=schedule_action_callback.new(action='next', page=page, c_id=c_id, dep_id=dep_id,
-                                                           teacher_id=teacher_id)
+                callback_data=next_action_callback_new
             )
         })
 
@@ -76,8 +89,7 @@ def get_schedules_keyboard(schedules, page, c_id, dep_id=0, teacher_id=0):
         schedules_inline_keyboard.append({
             InlineKeyboardButton(
                 '⬅️ Назад',
-                callback_data=schedule_action_callback.new(action='back', page=page, c_id=c_id, dep_id=dep_id,
-                                                           teacher_id=teacher_id)
+                callback_data=back_action_callback_new
             )
         })
 

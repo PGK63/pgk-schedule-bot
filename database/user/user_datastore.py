@@ -22,7 +22,6 @@ def create_student(chat_id, group, department_id):
         'X-API-KEY': API_TOKEN
     })
     if response.status_code == 201:
-        print(response.json())
         return response.json()
     return None
 
