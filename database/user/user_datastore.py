@@ -51,3 +51,9 @@ def get_student_by_chat_id(c_id):
     return requests.get(f"{BASE_URL}/students/by-telegram-id/{c_id}", headers={
         'X-API-KEY': API_TOKEN
     })
+
+
+def get_secret_key(c_id, key_type="ALICE_LOGIN"):
+    return requests.get(f"{BASE_URL}/secret-keys/by-telegram-id/{c_id}?type={key_type}", headers={
+        'X-API-KEY': API_TOKEN
+    })
