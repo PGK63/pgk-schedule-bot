@@ -4,8 +4,10 @@ from aiogram.utils.callback_data import CallbackData
 
 from bot.handlers.schedule.search.state.student_schedule_search_state import StudentScheduleSearchState
 from bot.handlers.schedule.search.state.teacher_schedule_search_state import TeacherScheduleSearchState
-from bot.handlers.schedule.search.student_schedule_search_handler import register_student_schedule_search_handler
-from bot.handlers.schedule.search.teacher_schedule_search_handler import register_teacher_schedule_search_handler
+from bot.handlers.schedule.search.student_schedule_search_handler import register_student_schedule_search_handler, \
+    schedule_search_student_cancelled_callback
+from bot.handlers.schedule.search.teacher_schedule_search_handler import register_teacher_schedule_search_handler, \
+    schedule_search_teacher_cancelled_callback
 
 schedule_search_type = CallbackData('schedule_search_type', 'type')
 
@@ -30,12 +32,35 @@ async def start_search(call: types.CallbackQuery, callback_data: dir):
 
     if search_type == 'group':
         await call.message.answer('🏫 Отправьте название группы в формате примера\nПример: ИСП-34',
-                                  disable_notification=True)
+                                  disable_notification=True,
+                                  reply_markup=types.InlineKeyboardMarkup(
+                                      row_width=1,
+                                      inline_keyboard=[
+                                          [
+                                              InlineKeyboardButton(
+                                                  text='Отмена',
+                                                  callback_data=schedule_search_student_cancelled_callback.new()
+                                              )
+                                          ]
+                                      ]
+                                  )
+                                  )
         await StudentScheduleSearchState.StartSearch.set()
     elif search_type == 'teacher':
         await call.message.answer(
             "✏️ Отправьте фамилию (имя отчество по желанию) преподавателя",
-            disable_notification=True
+            disable_notification=True,
+            reply_markup=types.InlineKeyboardMarkup(
+                row_width=1,
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(
+                            text='Отмена',
+                            callback_data=schedule_search_teacher_cancelled_callback.new()
+                        )
+                    ]
+                ]
+            )
         )
         await TeacherScheduleSearchState.StartSearch.set()
 

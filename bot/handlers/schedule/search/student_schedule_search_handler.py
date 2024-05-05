@@ -2,14 +2,19 @@ import re
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
+from aiogram.types import InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
 from bot.handlers.schedule.schedule_handler import get_schedules_keyboard
 from bot.handlers.schedule.search.state.student_schedule_search_state import StudentScheduleSearchState
 from database.schedule.schedule_datastore import get_schedules, student_get_schedules_message_group_name
 
-schedule_search_student_callback = CallbackData('schedule_search_student_callback', 'id', 'c_id', 'teacher_id', 'group_name')
-schedule_search_student_action_callback = CallbackData('schedule_search_student_action_callback', 'action', 'page', 'c_id', 'group_name')
+schedule_search_student_callback = CallbackData('schedule_search_student_callback', 'id', 'c_id', 'teacher_id',
+                                                'group_name')
+schedule_search_student_action_callback = CallbackData('schedule_search_student_action_callback', 'action', 'page',
+                                                       'c_id', 'group_name')
+
+schedule_search_student_cancelled_callback = CallbackData('schedule_search_student_cancelled_callback')
 
 
 async def input_group_name(message: types.Message, state: FSMContext):
@@ -23,7 +28,21 @@ async def input_group_name(message: types.Message, state: FSMContext):
                                  row_width=1,
                                  inline_keyboard=get_all_schedules_keyboard(0, message.chat.id, group_name)))
     else:
-        await message.answer('❌ Неверный формат группы')
+        await message.answer(
+            text='❌ Неверный формат группы',
+            disable_notification=True,
+            reply_markup=types.InlineKeyboardMarkup(
+                row_width=1,
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(
+                            text='Отмена',
+                            callback_data=schedule_search_student_cancelled_callback.new()
+                        )
+                    ]
+                ]
+            )
+        )
 
 
 async def update_schedules_group_name(call: types.CallbackQuery, callback_data: dict):
@@ -63,8 +82,17 @@ def get_all_schedules_keyboard(page, chat_id, group_name):
                                   )
 
 
+async def schedule_search_student_cancelled(call: types.CallbackQuery, state: FSMContext):
+    await state.finish()
+    await call.message.answer('✅')
+
+
 def register_student_schedule_search_handler(dp: Dispatcher):
     dp.register_message_handler(input_group_name, state=StudentScheduleSearchState.StartSearch)
 
     dp.register_callback_query_handler(update_schedules_group_name, schedule_search_student_action_callback.filter())
     dp.register_callback_query_handler(input_schedule_students_search, schedule_search_student_callback.filter())
+
+    dp.register_callback_query_handler(schedule_search_student_cancelled,
+                                       schedule_search_student_cancelled_callback.filter(),
+                                       state=StudentScheduleSearchState.StartSearch)

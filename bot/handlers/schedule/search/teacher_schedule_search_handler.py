@@ -1,6 +1,6 @@
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
-from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
 from bot.handlers.login.login_handler import get_teachers_reply_markup, teacher_callback
@@ -14,8 +14,10 @@ schedule_search_teacher_callback = CallbackData('schedule_search_teacher_callbac
 schedule_search_teacher_action_callback = CallbackData('schedule_search_teacher_action_callback', 'action', 'page',
                                                        'teacher_id', 'c_id')
 
+schedule_search_teacher_cancelled_callback = CallbackData('schedule_search_teacher_cancelled_callback')
 
-async def start_teacher_search(message: types.Message):
+
+async def start_teacher_search(message: types.Message, ):
     await message.answer(
         "👤 Выберите ФИО из списка\n\nНажмите 'Назад', чтобы попробовать еще раз",
         disable_notification=True,
@@ -27,7 +29,18 @@ async def input_teacher_search(call: types.CallbackQuery, callback_data: dict, s
     teacher_id = callback_data.get('id')
     if teacher_id == "back":
         await call.message.edit_text(
-            "✏️ Отправьте фамилию (имя отчество по желанию) преподавателя"
+            "✏️ Отправьте фамилию (имя отчество по желанию) преподавателя",
+            reply_markup=types.InlineKeyboardMarkup(
+                row_width=1,
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(
+                            text='Отмена',
+                            callback_data=schedule_search_teacher_cancelled_callback.new()
+                        )
+                    ]
+                ]
+            )
         )
     else:
         await state.finish()
@@ -77,6 +90,11 @@ def get_schedules_keyboard_by_teacher_id(teacher_id, page, chat_id):
                                   )
 
 
+async def schedule_search_teacher_cancelled(call: types.CallbackQuery, state: FSMContext):
+    await state.finish()
+    await call.message.answer('✅')
+
+
 def register_teacher_schedule_search_handler(dp: Dispatcher):
     dp.register_message_handler(start_teacher_search, state=TeacherScheduleSearchState.StartSearch)
 
@@ -85,3 +103,7 @@ def register_teacher_schedule_search_handler(dp: Dispatcher):
 
     dp.register_callback_query_handler(input_schedule_teachers_search, schedule_search_teacher_callback.filter())
     dp.register_callback_query_handler(update_schedules_by_teacher_id, schedule_search_teacher_action_callback.filter())
+
+    dp.register_callback_query_handler(schedule_search_teacher_cancelled,
+                                       schedule_search_teacher_cancelled_callback.filter(),
+                                       state=TeacherScheduleSearchState.StartSearch)
