@@ -56,7 +56,14 @@ async def secret_key_message(call: types.CallbackQuery, callback_data: dict):
 
     if key_type == 'ALICE_LOGIN':
         message = f'🔑 Код для входа <i><b><u>{key_json["key"]}</u></b></i>'
-        await call.message.answer(message, disable_notification=True)
+        await call.message.answer(message, disable_notification=True, reply_markup=InlineKeyboardMarkup(
+            row_width=1,
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text='🌐 Навык', url='https://alice.ya.ru/s/99694ba7-cba5-4eab-b10a-462075686778')
+                ]
+            ]
+        ))
 
 
 def get_secret_keys_reply_markup():
@@ -64,7 +71,7 @@ def get_secret_keys_reply_markup():
         row_width=1,
         inline_keyboard=[
             [
-                InlineKeyboardButton(text='🤖Алиса', callback_data=secret_key_callback.new(type='ALICE_LOGIN')),
+                InlineKeyboardButton(text='🤖Алиса', callback_data=secret_key_callback.new(type='ALICE_LOGIN'))
             ]
         ]
     )
