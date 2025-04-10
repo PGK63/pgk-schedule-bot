@@ -1,0 +1,9 @@
+services:
+  pgk-schedule-bot:
+    image: pgk-schedule-bot:latest
+    build:
+      context: .
+      args:
+        DOCKER_BUILDKIT: 1
+    restart: "no"
+    env_file: .env
