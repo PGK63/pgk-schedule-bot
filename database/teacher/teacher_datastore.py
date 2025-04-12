@@ -4,7 +4,7 @@ from database.common.constants import BASE_URL, API_TOKEN
 
 
 def get_teachers(name):
-    return requests.get(f'https://pgk.schedule.api.danbel.ru:30/teacher-service?name={name}', headers={
+    return requests.get(f'{BASE_URL}/teachers?name={name}', headers={
         'X-API-KEY': API_TOKEN
     }).json()
 
