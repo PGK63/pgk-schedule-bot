@@ -12,7 +12,7 @@ from bot.handlers.schedule.search.schedule_search_handler import register_schedu
 from bot.handlers.user.user_handler import register_user
 from bot.services.setting_commands import set_default_commands
 
-bot = Bot(token='5884965201:AAGQ0V2NV1M9xjd8ciVo1vbKPDayLX2jKr4', parse_mode='HTML')
+bot = Bot(token='7700309962:AAGlhS_7nU9zEp7cKhevBYdq3kKF7ZRfLhk', parse_mode='HTML')
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
